@@ -155,16 +155,23 @@ function initCaptcha() {
 }
 
 /* ========= 登入 / 註冊 ========= */
+let loginLock = false;
+
 async function handleAuth(type) {
   const msg = document.getElementById("msg");
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
   const confirm = document.getElementById("confirmPassword").value;
 
+  msg.style.color = "#dc3545";
+  msg.textContent = "";
+
   if (!verified) {
     msg.textContent = "❌ 請完成圖片驗證";
     return;
   }
+
+  if (type === "login" && loginLock) return;
 
   if (type === "register") {
     if (password.length < 8) {
@@ -177,29 +184,49 @@ async function handleAuth(type) {
     }
   }
 
-  const res = await fetch(`/api/auth/${type}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    msg.textContent = data.message || "❌ 操作失敗";
-    return;
-  }
-
-  /* ✅ 登入成功 → 導向 OTP */
   if (type === "login") {
-    localStorage.setItem("otp_user_id", data.userId);
-    location.href = "otp.html";
+    loginLock = true; // 避免連點造成 OTP 被覆蓋
+    document.getElementById("loginBtn").disabled = true;
   }
 
-  if (type === "register") {
-    msg.style.color = "#28a745";
-    msg.textContent = "✅ 註冊成功，請登入";
-    initCaptcha();
+  try {
+    const res = await fetch(`/api/auth/${type}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.message || "❌ 操作失敗";
+      if (type === "login") {
+        loginLock = false;
+        document.getElementById("loginBtn").disabled = false;
+      }
+      return;
+    }
+
+    /* ✅ 登入成功 → 導向 OTP */
+    if (type === "login") {
+      // ✅ 這行是關鍵修正：統一 key 名稱，OTP 頁讀的也是 otp_user_id
+      localStorage.setItem("otp_user_id", String(data.userId));
+      location.href = "otp.html";
+      return;
+    }
+
+    if (type === "register") {
+      msg.style.color = "#28a745";
+      msg.textContent = "✅ 註冊成功，請登入";
+      initCaptcha();
+    }
+
+  } catch (e) {
+    msg.textContent = "❌ 伺服器連線失敗";
+    if (type === "login") {
+      loginLock = false;
+      document.getElementById("loginBtn").disabled = false;
+    }
   }
 }
 

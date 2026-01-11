@@ -1,143 +1,254 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>為什麼要演奏春日影</title>
-    <style>
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
-        header { background-color: #2c3e50; color: #fff; padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
-        nav a { color: #fff; text-decoration: none; margin-left: 20px; font-size: 0.9rem; cursor: pointer; transition: 0.3s; }
-        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 280px; gap: 30px; }
-        .post { background: #fff; padding: 25px; border-radius: 10px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .post h3 { margin-top: 0; color: #2c3e50; border-left: 5px solid #3a96b3; padding-left: 15px; }
-        .post-meta { font-size: 0.8rem; color: #999; margin-bottom: 10px; }
-        .post p { line-height: 1.7; color: #555; font-size: 0.95rem; }
-        .sidebar { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); height: fit-content; text-align: center; }
-        .user-info { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .user-info h4 { margin: 0; color: #3a96b3; }
-        .btn { display: block; width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9rem; text-decoration: none; }
-        .btn-profile { background-color: #3a96b3; color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>為什麼要演奏春日影</title>
+
+<style>
+body {
+  font-family: "Microsoft JhengHei", sans-serif;
+  background: #f4f7f6;
+  margin: 0;
+}
+header {
+  background: #2c3e50;
+  color: #fff;
+  padding: 1rem 5%;
+  display: flex;
+  justify-content: space-between;
+}
+nav a {
+  color: #fff;
+  margin-left: 20px;
+  cursor: pointer;
+}
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 30px;
+}
+.post {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.post-meta {
+  font-size: .8rem;
+  color: #999;
+}
+textarea, input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+.btn {
+  padding: 8px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.btn-main { background: #3a96b3; color: white; }
+.btn-danger { background: #ff7675; color: white; }
+
+.delete-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.post img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.sidebar {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+</style>
 </head>
+
 <body>
 
 <header>
-    <h1>🎸 為什麼要演奏春日影</h1>
-    <nav>
-        <a href="profile.html">個人資料</a>
-        <a id="nav-logout-btn" style="color: #ff7675;">登出</a>
-    </nav>
+  <h1>🎸 為什麼要演奏春日影</h1>
+  <nav>
+    <a href="profile.html">個人資料</a>
+    <a id="logout" style="color:#ff7675;">登出</a>
+  </nav>
 </header>
 
 <div class="container">
-    <main>
-        <article class="post">
-            <div class="post-meta">發佈者：燈 | 2026-01-02</div>
-            <h3>咕咕嘎嘎</h3>
-            <p>咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎咕咕嘎嘎</p>
-        </article>
-        <article class="post">
-            <div class="post-meta">發佈者：爽世 | 2026-01-01</div>
-            <h3>如果不加密的話...挖塔西</h3>
-            <p>要怎麼做才能回來？只要是我能做的，我什麼都願意做！</p>
-        </article>
-        <article class="post">
-            <div class="post-meta">發佈者：祥子 | 2025-12-30</div>
-            <h3>還真是高高在上呢</h3>
-            <p>你這個人...滿腦子都只想到自己呢.</p>
-        </article>
-    </main>
 
-   <aside class="sidebar">
-    <div class="user-info">
-        <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">當前登入帳號</p>
-        <h4 id="user-email">載入中...</h4>
-    </div>
+<main id="post-area">
+  <!-- 發文區 -->
+  <article class="post">
+    <h3>✏️ 發表新貼文</h3>
+    <input id="post-title" placeholder="標題">
+    <textarea id="post-content" rows="4" placeholder="內容"></textarea>
 
-    <a href="profile.html" id="profile-btn" class="btn btn-profile">
-        查看個人資料
-    </a>
+    <!-- ✅ 新增圖片上傳 -->
+    <input type="file" id="post-image" accept="image/*">
 
-    <!-- 🔐 admin 專用（預設隱藏） -->
-    <a href="#" id="admin-btn" class="btn btn-profile" style="display:none;">
-        🛠 管理員後台
-    </a>
+    <button id="post-submit" class="btn btn-main">送出</button>
+  </article>
+</main>
+
+<aside class="sidebar">
+  <p>登入帳號</p>
+  <h4 id="user-email">載入中...</h4>
+  <a href="profile.html" class="btn btn-main">查看個人資料</a>
+  <a id="admin-btn" class="btn btn-main" style="display:none;">🛠 管理員後台</a>
 </aside>
 
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const token = localStorage.getItem('auth_token');
+const token = localStorage.getItem('auth_token');
+let isAdmin = false;
 
-  const emailDisplay = document.getElementById('user-email');
-  const profileBtn = document.getElementById('profile-btn');
-  const adminBtn = document.getElementById('admin-btn');
-  const logoutBtn = document.getElementById('nav-logout-btn');
+if (!token) location.href = "index.html";
 
-  // 登出
-  logoutBtn?.addEventListener('click', () => {
-    if (confirm("確定要登出並結束連線嗎？")) {
-      localStorage.removeItem('auth_token');
-      location.href = "index.html";
-    }
-  });
+document.getElementById('logout').onclick = () => {
+  localStorage.removeItem('auth_token');
+  location.href = "index.html";
+};
 
-  // 沒 token → 擋
-  if (!token) {
-    alert("⚠️ 請先登入系統");
-    return location.href = "index.html";
-  }
-
+(async () => {
   try {
-    /* =========================
-       1️⃣ 驗證登入（一定要成功）
-    ========================= */
     const res = await fetch('/api/auth/profile', {
       headers: { Authorization: 'Bearer ' + token }
     });
-
-    if (!res.ok) throw new Error('Token invalid');
+    if (!res.ok) throw 'invalid';
 
     const data = await res.json();
-    emailDisplay.textContent = data.user.email;
-    emailDisplay.style.color = "#3a96b3";
+    document.getElementById('user-email').textContent = data.user.email;
 
-    /* =========================
-       2️⃣ 檢查 admin（403 是正常）
-    ========================= */
-    const adminRes = await fetch('/api/admin/dashboard', {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-
-    if (adminRes.status === 200 && adminBtn) {
-      adminBtn.style.display = 'block';
-      adminBtn.onclick = () => location.href = "admin.html";
-    } else if (adminBtn) {
-      adminBtn.style.display = 'none'; // ❗不是 admin，不是錯
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert("登入狀態已失效，請重新登入");
+    await checkAdmin();
+    loadPosts();
+  } catch {
     localStorage.removeItem('auth_token');
     location.href = "index.html";
   }
+})();
 
-  // 個人資料
-  profileBtn?.addEventListener('click', e => {
-    e.preventDefault();
-    location.href = "profile.html";
+async function checkAdmin() {
+  const res = await fetch('/api/admin/dashboard', {
+    headers: { Authorization: 'Bearer ' + token }
   });
+  if (res.status === 200) {
+    isAdmin = true;
+    document.getElementById('admin-btn').style.display = 'block';
+    document.getElementById('admin-btn').onclick = () => location.href = "admin.html";
+  }
+}
+
+async function loadPosts() {
+  const res = await fetch('/api/posts');
+  const posts = await res.json();
+  const area = document.getElementById('post-area');
+
+  const composer = area.querySelector('article.post');
+  area.innerHTML = '';
+  area.appendChild(composer);
+
+  posts.forEach(p => {
+    const post = document.createElement('article');
+    post.className = 'post';
+
+    post.innerHTML = `
+      <div class="post-meta">發佈者：${p.author}</div>
+
+      ${isAdmin ? `
+        <button class="btn btn-danger delete-btn" data-id="${p.id}">
+          🗑 刪除貼文
+        </button>` : ''}
+
+      <h3>${p.title}</h3>
+      <p>${p.content}</p>
+
+      ${p.image ? `<img src="${p.image}">` : ''}
+
+      <div class="comments">
+        <h4>💬 留言</h4>
+        ${p.comments.map(c => `
+          <div><strong>${c.author}：</strong>${c.content}</div>
+        `).join('')}
+
+        <textarea rows="2" placeholder="留言..." data-post="${p.id}"></textarea>
+        <button class="btn btn-main comment-btn" data-post="${p.id}">送出留言</button>
+      </div>
+    `;
+    area.appendChild(post);
+  });
+}
+
+/* ✅ 發文（改用 FormData） */
+document.getElementById('post-submit').onclick = async () => {
+  const title = document.getElementById('post-title').value.trim();
+  const content = document.getElementById('post-content').value.trim();
+  const image = document.getElementById('post-image').files[0];
+
+  if (!title || !content) return alert("請填完整");
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('content', content);
+  if (image) formData.append('image', image);
+
+  const res = await fetch('/api/posts', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + token
+    },
+    body: formData
+  });
+
+  if (res.ok) location.reload();
+  else alert('發文失敗');
+};
+
+async function deletePost(id) {
+  if (!confirm("確定刪除？")) return;
+  const res = await fetch(`/api/posts/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (res.ok) location.reload();
+}
+
+document.addEventListener('click', async e => {
+  if (e.target.classList.contains('delete-btn')) {
+    return deletePost(e.target.dataset.id);
+  }
+
+  if (!e.target.classList.contains('comment-btn')) return;
+
+  const postId = e.target.dataset.post;
+  const textarea = document.querySelector(`textarea[data-post="${postId}"]`);
+  const content = textarea.value.trim();
+  if (!content) return alert('請輸入留言');
+
+  const res = await fetch(`/api/posts/${postId}/comments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token
+    },
+    body: JSON.stringify({ content })
+  });
+  if (res.ok) location.reload();
 });
 </script>
-
-
-
 
 </body>
 </html>

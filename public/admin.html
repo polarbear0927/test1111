@@ -72,10 +72,10 @@
       </tr>
     </thead>
     <tbody id="user-table-body">
-  <tr>
-    <td colspan="2">載入中...</td>
-  </tr>
-</tbody>
+      <tr>
+        <td colspan="2">載入中...</td>
+      </tr>
+    </tbody>
   </table>
 </div>
 
@@ -106,10 +106,10 @@ async function initAdmin() {
 
     const data = await res.json();
 
-    // ✅ 修正 typo（這行是關鍵）
+    // ✅ 修正完成：正確取值
     document.getElementById('admin-info').innerHTML = `
       ✅ 已通過管理員驗證<br>
-      登入帳號：<strong>${data.admin}</strong>
+      登入帳號：<strong>${data.user.email}</strong>
     `;
 
     // 2️⃣ 載入使用者列表
@@ -157,8 +157,6 @@ async function loadUsers() {
 
 initAdmin();
 </script>
-
-
 
 </body>
 </html>

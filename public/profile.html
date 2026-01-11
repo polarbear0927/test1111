@@ -1,76 +1,195 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>使用者帳戶資料</title>
-    <style>
-        body { font-family: sans-serif; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
-        .profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        .avatar-box { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 2px solid #007bff; cursor: pointer; }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .info-group { text-align: left; margin-top: 20px; }
-        label { font-size: 12px; color: #666; font-weight: bold; }
-        .value { font-size: 16px; margin-bottom: 15px; color: #333; }
-        button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer; }
-        .btn-back { background: #eee; }
-    </style>
+<meta charset="UTF-8">
+<title>使用者帳戶資料</title>
 
+<style>
+body {
+  font-family: sans-serif;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 50px;
+}
+.profile-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 350px;
+  text-align: center;
+}
+.avatar-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #eee;
+  margin: 0 auto 15px;
+  overflow: hidden;
+  border: 2px solid #007bff;
+  cursor: pointer;
+}
+.avatar-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.info-group {
+  text-align: left;
+  margin-top: 20px;
+}
+label {
+  font-size: 12px;
+  color: #666;
+  font-weight: bold;
+}
+.value {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.btn-gray { background: #eee; }
+.btn-main { background: #0984e3; color: white; }
+.btn-danger { background: #ff7675; color: white; }
+
+.admin-link {
+  margin-bottom: 15px;
+  background: #6c5ce7;
+  color: white;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+</style>
 </head>
+
 <body>
-<a href="admin.html" id="admin-btn" class="btn btn-profile" style="background:#6c5ce7;">管理員後台</a>
+
+<a href="admin.html" id="admin-btn" class="admin-link" style="display:none;">🛠 管理員後台</a>
+
 <div class="profile-card">
-    <div class="avatar-box" id="avatar-click-zone">
-        <img id="preview" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="頭像">
-    </div>
-    <input type="file" id="fileInput" hidden accept="image/*">
-    <p style="font-size: 12px; color: #007bff;">點擊更換大頭貼</p>
 
-    <div class="info-group">
-        <label>電子郵件</label>
-        <div class="value" id="email-display">---</div>
-        <label>安全狀態</label>
-        <div class="value" style="color: green;">● 已通過身分驗證</div>
-    </div>
+  <!-- 大頭貼 -->
+  <div class="avatar-box" id="avatar-click-zone">
+    <img id="preview" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
+  </div>
+  <input type="file" id="fileInput" hidden accept="image/*">
+  <p style="font-size:12px;color:#0984e3;">點擊更換大頭貼</p>
 
-    <button type="button" class="btn-back" id="back-to-main">返回主頁</button>
+  <!-- 基本資訊 -->
+  <div class="info-group">
+    <label>電子郵件</label>
+    <div class="value" id="email-display">---</div>
+
+    <label>安全狀態</label>
+    <div class="value" style="color:green;">● 已通過身分驗證</div>
+
+    <label>最近登入</label>
+    <div class="value" id="last-login">---</div>
+  </div>
+
+  <!-- 功能區 -->
+  <div class="toggle">
+    <input type="checkbox" id="darkToggle">
+    <span>🌙 深色模式</span>
+  </div>
+
+  <button class="btn-gray" id="logout-btn">🚪 登出帳號</button>
+  <button class="btn-danger" id="clear-btn">⚠️ 清除本機帳戶資料</button>
+  <button class="btn-gray" id="back-to-main">返回主頁</button>
+
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview');
-        const avatarZone = document.getElementById('avatar-click-zone');
-        const backBtn = document.getElementById('back-to-main');
+document.addEventListener('DOMContentLoaded', () => {
 
-        // 初始化資訊
-        document.getElementById('email-display').innerText = localStorage.getItem('userEmail') || '未登入';
-        const savedImg = localStorage.getItem('userAvatar');
-        if (savedImg) preview.src = savedImg;
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const avatarZone = document.getElementById('avatar-click-zone');
 
-        // 綁定大頭貼點擊
-        avatarZone.addEventListener('click', () => fileInput.click());
+  /* ===== 初始化帳戶資訊 ===== */
+  document.getElementById('email-display').innerText =
+    localStorage.getItem('userEmail') || '未登入';
 
-        // 處理上傳邏輯
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.size < 2 * 1024 * 1024) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const base64 = event.target.result;
-                    preview.src = base64;
-                    localStorage.setItem('userAvatar', base64);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                alert("檔案過大（需 < 2MB）或格式不符");
-            }
-        });
+  document.getElementById('last-login').innerText =
+    new Date().toLocaleString('zh-TW');
 
-        // 返回主頁
-        backBtn.addEventListener('click', () => {
-            window.location.href = 'main.html';
-        });
-    });
+  if (localStorage.getItem('userAvatar')) {
+    preview.src = localStorage.getItem('userAvatar');
+  }
+
+  /* ===== 管理員顯示 ===== */
+  if (localStorage.getItem('isAdmin') === 'true') {
+    document.getElementById('admin-btn').style.display = 'block';
+  }
+
+  /* ===== 大頭貼上傳 ===== */
+  avatarZone.onclick = () => fileInput.click();
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file || file.size > 2 * 1024 * 1024) {
+      alert('圖片需小於 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      preview.src = ev.target.result;
+      localStorage.setItem('userAvatar', ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  /* ===== 深色模式 ===== */
+  const toggle = document.getElementById('darkToggle');
+  if (localStorage.getItem('darkMode') === 'on') {
+    document.body.style.background = '#2d3436';
+    document.querySelector('.profile-card').style.background = '#353b48';
+    document.querySelector('.profile-card').style.color = '#f5f6fa';
+    toggle.checked = true;
+  }
+
+  toggle.onchange = () => {
+    if (toggle.checked) {
+      localStorage.setItem('darkMode', 'on');
+    } else {
+      localStorage.removeItem('darkMode');
+    }
+    location.reload();
+  };
+
+  /* ===== 登出 ===== */
+  document.getElementById('logout-btn').onclick = () => {
+    localStorage.removeItem('auth_token');
+    location.href = 'index.html';
+  };
+
+  /* ===== 清除帳戶 ===== */
+  document.getElementById('clear-btn').onclick = () => {
+    if (confirm('確定清除所有本機帳戶資料？')) {
+      localStorage.clear();
+      location.href = 'index.html';
+    }
+  };
+
+  /* ===== 返回主頁 ===== */
+  document.getElementById('back-to-main').onclick = () => {
+    location.href = 'main.html';
+  };
+});
 </script>
+
 </body>
 </html>

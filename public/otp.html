@@ -100,16 +100,18 @@
   </div>
 </div>
 
+<!-- ✅ 正確的 script 區塊 -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const userId = localStorage.getItem("otp_user_id");
+  const userId = Number(localStorage.getItem("otp_user_id"));
   const otpInput = document.getElementById("otp");
   const verifyBtn = document.getElementById("verifyBtn");
   const msg = document.getElementById("msg");
 
   // 🚫 防止直接進 OTP 頁
-  if (!userId) {
+  if (!userId || isNaN(userId)) {
     alert("⚠️ 請先完成帳號密碼登入");
+    localStorage.removeItem("otp_user_id");
     location.href = "index.html";
     return;
   }
@@ -119,16 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
     otpInput.value = otpInput.value.replace(/\D/g, "");
   });
 
-  // ⏎ Enter 鍵送出
-  otpInput.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      verifyBtn.click();
-    }
-  });
-
   verifyBtn.addEventListener("click", async () => {
     const otp = otpInput.value.trim();
-
     msg.textContent = "";
 
     if (!/^\d{6}$/.test(otp)) {
@@ -157,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // ✅ OTP 通過 → 正式登入
+      // ✅ OTP 成功
       localStorage.removeItem("otp_user_id");
       localStorage.setItem("auth_token", data.token);
 

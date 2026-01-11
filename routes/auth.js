@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-
-// ❌ 不要 require security
-// ❌ 不要 verifyToken
-// ❌ 不要 admin
+const { verifyToken } = require('../middleware/security');
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/verify-otp', authController.verifyOtp);
-router.get('/profile', authController.profile);
+
+// ✅ profile 需要登入 token
+router.get('/profile', verifyToken, authController.profile);
 
 module.exports = router;
