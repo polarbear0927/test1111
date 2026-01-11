@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>管理員後台</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 30px;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logout-btn {
+      background: #ff7675;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background: #f0f2f5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <h1>🛠 管理員後台</h1>
+  <button class="logout-btn" id="logoutBtn">登出</button>
+</div>
+
+<div class="card">
+  <h3>🔐 管理員驗證狀態</h3>
+  <p id="admin-info">驗證中...</p>
+</div>
+
+<div class="card">
+  <h3>👥 使用者列表（RBAC 示範）</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>角色</th>
+      </tr>
+    </thead>
+    <tbody id="user-table-body">
+  <tr>
+    <td colspan="2">載入中...</td>
+  </tr>
+</tbody>
+  </table>
+</div>
+
+<script>
+const token = localStorage.getItem('auth_token');
+
+if (!token) {
+  alert("請先登入");
+  location.href = "index.html";
+}
+
+// 登出
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (confirm('確定要登出嗎？')) {
+    localStorage.removeItem('auth_token');
+    location.href = "index.html";
+  }
+});
+
+async function initAdmin() {
+  try {
+    // 1️⃣ 管理員身分驗證
+    const res = await fetch('/api/admin/dashboard', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+
+    if (!res.ok) throw new Error('NOT_ADMIN');
+
+    const data = await res.json();
+
+    // ✅ 修正 typo（這行是關鍵）
+    document.getElementById('admin-info').innerHTML = `
+      ✅ 已通過管理員驗證<br>
+      登入帳號：<strong>${data.admin}</strong>
+    `;
+
+    // 2️⃣ 載入使用者列表
+    loadUsers();
+
+  } catch (err) {
+    console.error(err);
+    alert("權限不足，將返回首頁");
+    location.href = "main.html";
+  }
+}
+
+async function loadUsers() {
+  const tbody = document.getElementById('user-table-body');
+  tbody.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/admin/users', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+
+    if (!res.ok) throw new Error();
+
+    const users = await res.json();
+
+    users.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.email}</td>
+        <td>${u.role}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="2" style="color:red;">
+          無法載入使用者資料
+        </td>
+      </tr>
+    `;
+  }
+}
+
+initAdmin();
+</script>
+
+
+
+</body>
+</html>

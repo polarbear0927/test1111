@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>做一輩子的資安</title>
+
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 380px;
+      text-align: center;
+    }
+    h1 { color: #007bff; margin-bottom: 5px; }
+    .subtitle { color: #666; margin-bottom: 25px; font-size: 14px; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .verify-box {
+      margin: 20px 0;
+      padding: 15px;
+      border: 2px dashed #007bff;
+      border-radius: 10px;
+      background: #f8fbff;
+    }
+    .img-group {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .verify-img {
+      width: 135px;
+      height: 135px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 4px solid transparent;
+      border-radius: 8px;
+    }
+    .selected {
+      border-color: #28a745;
+      box-shadow: 0 0 8px rgba(40,167,69,0.4);
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn-login {
+      flex: 2;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .btn-register {
+      flex: 1;
+      padding: 12px;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #msg {
+      color: #dc3545;
+      font-size: 14px;
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 20px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="login-container">
+  <h1>做一輩子的資安</h1>
+  <div class="subtitle">請登入或註冊帳號</div>
+
+  <input type="email" id="email" placeholder="請輸入 Email" />
+  <input type="password" id="password" placeholder="請輸入密碼（至少 8 碼）" />
+  <input type="password" id="confirmPassword" placeholder="再次輸入密碼（註冊用）" />
+
+  <div class="verify-box">
+    <div><strong>圖片驗證：哪張「不是」三角初華？</strong></div>
+    <div class="img-group" id="quiz"></div>
+  </div>
+
+  <p id="msg"></p>
+
+  <div class="btn-group">
+    <button id="loginBtn" class="btn-login">登入</button>
+    <button id="registerBtn" class="btn-register">註冊</button>
+  </div>
+</div>
+
+<script>
+/* ========= 圖片驗證 ========= */
+const uika = ["img/uika_1.jpg","img/uika_2.jpg","img/uika_3.jpg"];
+const other = [
+  "img/other_1.jpg","img/other_2.jpg","img/other_3.jpg",
+  "img/other_4.jpg","img/other_5.jpg","img/other_6.jpg"
+];
+let verified = false;
+
+function initCaptcha() {
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = "";
+  verified = false;
+
+  const items = [
+    { src: uika[Math.floor(Math.random()*uika.length)], ok: false },
+    { src: other[Math.floor(Math.random()*other.length)], ok: true }
+  ].sort(() => Math.random() - 0.5);
+
+  items.forEach(item => {
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.className = "verify-img";
+    img.onclick = () => {
+      document.querySelectorAll(".verify-img")
+        .forEach(i => i.classList.remove("selected"));
+
+      if (item.ok) {
+        img.classList.add("selected");
+        verified = true;
+      } else {
+        alert("❌ 驗證失敗，請重新選擇");
+        initCaptcha();
+      }
+    };
+    quiz.appendChild(img);
+  });
+}
+
+/* ========= 登入 / 註冊 ========= */
+async function handleAuth(type) {
+  const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirm = document.getElementById("confirmPassword").value;
+
+  if (!verified) {
+    msg.textContent = "❌ 請完成圖片驗證";
+    return;
+  }
+
+  if (type === "register") {
+    if (password.length < 8) {
+      msg.textContent = "❌ 密碼至少 8 碼";
+      return;
+    }
+    if (password !== confirm) {
+      msg.textContent = "❌ 兩次密碼不一致";
+      return;
+    }
+  }
+
+  const res = await fetch(`/api/auth/${type}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    msg.textContent = data.message || "❌ 操作失敗";
+    return;
+  }
+
+  /* ✅ 登入成功 → 導向 OTP */
+  if (type === "login") {
+    localStorage.setItem("otp_user_id", data.userId);
+    location.href = "otp.html";
+  }
+
+  if (type === "register") {
+    msg.style.color = "#28a745";
+    msg.textContent = "✅ 註冊成功，請登入";
+    initCaptcha();
+  }
+}
+
+document.getElementById("loginBtn").onclick = () => handleAuth("login");
+document.getElementById("registerBtn").onclick = () => handleAuth("register");
+initCaptcha();
+</script>
+</body>
+</html>

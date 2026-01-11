@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OTP 驗證｜做一輩子的資安</title>
+
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .otp-container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 360px;
+      text-align: center;
+    }
+    h1 {
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    #msg {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 20px;
+    }
+    .tip {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+<div class="otp-container">
+  <h1>🔐 OTP 驗證</h1>
+
+  <div class="subtitle">
+    第二步驟驗證<br>
+    請輸入系統產生的一次性密碼
+  </div>
+
+  <input
+    type="text"
+    id="otp"
+    maxlength="6"
+    inputmode="numeric"
+    autocomplete="one-time-code"
+    placeholder="● ● ● ● ● ●"
+  />
+
+  <button id="verifyBtn">驗證並登入</button>
+
+  <p id="msg"></p>
+
+  <div class="tip">
+    ✔ OTP 為一次性密碼<br>
+    ✔ 有效時間 5 分鐘<br>
+    ✔ 驗證成功後才會發放 JWT
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const userId = localStorage.getItem("otp_user_id");
+  const otpInput = document.getElementById("otp");
+  const verifyBtn = document.getElementById("verifyBtn");
+  const msg = document.getElementById("msg");
+
+  // 🚫 防止直接進 OTP 頁
+  if (!userId) {
+    alert("⚠️ 請先完成帳號密碼登入");
+    location.href = "index.html";
+    return;
+  }
+
+  // 🔢 只允許數字
+  otpInput.addEventListener("input", () => {
+    otpInput.value = otpInput.value.replace(/\D/g, "");
+  });
+
+  // ⏎ Enter 鍵送出
+  otpInput.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      verifyBtn.click();
+    }
+  });
+
+  verifyBtn.addEventListener("click", async () => {
+    const otp = otpInput.value.trim();
+
+    msg.textContent = "";
+
+    if (!/^\d{6}$/.test(otp)) {
+      msg.style.color = "#dc3545";
+      msg.textContent = "❌ OTP 必須是 6 位數字";
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = "驗證中...";
+
+    try {
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, otp })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        msg.style.color = "#dc3545";
+        msg.textContent = data.message || "❌ OTP 驗證失敗";
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "驗證並登入";
+        return;
+      }
+
+      // ✅ OTP 通過 → 正式登入
+      localStorage.removeItem("otp_user_id");
+      localStorage.setItem("auth_token", data.token);
+
+      msg.style.color = "#28a745";
+      msg.textContent = "✅ 驗證成功，登入中...";
+
+      setTimeout(() => {
+        location.href = "main.html";
+      }, 800);
+
+    } catch {
+      msg.style.color = "#dc3545";
+      msg.textContent = "❌ 伺服器連線失敗";
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = "驗證並登入";
+    }
+  });
+});
+</script>
+</body>
+</html>

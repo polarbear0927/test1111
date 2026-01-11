@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>使用者帳戶資料</title>
+    <style>
+        body { font-family: sans-serif; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+        .profile-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        .avatar-box { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; overflow: hidden; border: 2px solid #007bff; cursor: pointer; }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+        .info-group { text-align: left; margin-top: 20px; }
+        label { font-size: 12px; color: #666; font-weight: bold; }
+        .value { font-size: 16px; margin-bottom: 15px; color: #333; }
+        button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer; }
+        .btn-back { background: #eee; }
+    </style>
+
+</head>
+<body>
+<a href="admin.html" id="admin-btn" class="btn btn-profile" style="background:#6c5ce7;">管理員後台</a>
+<div class="profile-card">
+    <div class="avatar-box" id="avatar-click-zone">
+        <img id="preview" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="頭像">
+    </div>
+    <input type="file" id="fileInput" hidden accept="image/*">
+    <p style="font-size: 12px; color: #007bff;">點擊更換大頭貼</p>
+
+    <div class="info-group">
+        <label>電子郵件</label>
+        <div class="value" id="email-display">---</div>
+        <label>安全狀態</label>
+        <div class="value" style="color: green;">● 已通過身分驗證</div>
+    </div>
+
+    <button type="button" class="btn-back" id="back-to-main">返回主頁</button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const avatarZone = document.getElementById('avatar-click-zone');
+        const backBtn = document.getElementById('back-to-main');
+
+        // 初始化資訊
+        document.getElementById('email-display').innerText = localStorage.getItem('userEmail') || '未登入';
+        const savedImg = localStorage.getItem('userAvatar');
+        if (savedImg) preview.src = savedImg;
+
+        // 綁定大頭貼點擊
+        avatarZone.addEventListener('click', () => fileInput.click());
+
+        // 處理上傳邏輯
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.size < 2 * 1024 * 1024) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const base64 = event.target.result;
+                    preview.src = base64;
+                    localStorage.setItem('userAvatar', base64);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert("檔案過大（需 < 2MB）或格式不符");
+            }
+        });
+
+        // 返回主頁
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'main.html';
+        });
+    });
+</script>
+</body>
+</html>
