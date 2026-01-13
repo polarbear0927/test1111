@@ -37,3 +37,69 @@
   (3). 用戶後續請求在 Header 攜帶 `Authorization: Bearer <JWT>`  
   (4). `AuthTokenFilter` 攔截請求，驗證 JWT 有效性並將權限存入 `SecurityContext`  
   (5). Controller 根據權限決定是否允許訪問  
+
+## 專案原始碼結構  
+src/main/java/com/example/demo/  
+├── SpringBootSecurityJwtApplication.java (啟動類)  
+├── controllers/  
+│&emsp;&emsp;├── AuthController.java (登入註冊入口)  
+│&emsp;&emsp;└── TestController.java (權限測試接口)  
+├── models/  
+│&emsp;&emsp;├── ERole.java (枚舉類：USER, MODERATOR, ADMIN)  
+│&emsp;&emsp;├── Role.java (資料表：roles)  
+│&emsp;&emsp;└── User.java (資料表：users)  
+├── payload/ (請求與回應的數據結構)  
+│&emsp;&emsp;├── request/ (LoginRequest, SignupRequest)  
+│&emsp;&emsp;└── response/ (UserInfoResponse, MessageResponse)  
+├── repository/  
+│&emsp;&emsp;├── RoleRepository.java  
+│&emsp;&emsp;└── UserRepository.java  
+└── security/  
+&emsp;&emsp;├── WebSecurityConfig.java (核心安全配置)  
+&emsp;&emsp;├── jwt/  
+&emsp;&emsp;│&emsp;&emsp;├── AuthEntryPointJwt.java (異常處理)  
+&emsp;&emsp;│&emsp;&emsp;├── AuthTokenFilter.java (過濾器)  
+&emsp;&emsp;│&emsp;&emsp;└── JwtUtils.java (JWT 工具類)  
+&emsp;&emsp;└── services/  
+&emsp;&emsp;&emsp;&emsp;&emsp;├── UserDetailsImpl.java  
+&emsp;&emsp;&emsp;&emsp;&emsp;└── UserDetailsServiceImpl.java (用戶資料加載)  
+
+##  安全設計說明
+1. 密碼加密：使用 `BCryptPasswordEncoder` 對用戶密碼進行單向雜湊存儲，防止資料庫洩漏後密碼被還原
+2. JWT 認證：  
+   ● 使用 `HS256` 算法簽名  
+   ● 令牌包含用戶資訊與過期時間，避免在伺服器端存儲 Session  
+3. 跨域防護 (CORS)：在 `WebSecurityConfig` 中配置了 CORS，限制僅允許特定來源訪問
+4. 預防攻擊：Spring Security 默認配置了防護措施，且通過 `AuthTokenFilter` 過濾非法請求
+5. 授權控制：使用 `@PreAuthorize` 註解在方法層級控制 API 訪問權限
+
+## 運行環境
+● 作業系統：Windows / macOS / Linux   
+● 開發環境：Visual Studio Code  
+● 後端環境：Node.js v14+ / npm  
+● 瀏覽器限制：建議使用 Chrome 或 Edge 以確保 localStorage 與圖片渲染完全相
+容  
+● 偵錯工具：  
+&emsp;&emsp;○ DevTools (F12)：監測 Application 標籤中的 localStorage 變動   
+&emsp;&emsp;○ Network 標籤：監控 API 請求狀態與路徑正確性  
+
+## 資料庫建置方式與資料表設計  
+1. 建置方式：  
+   在 `src/main/resources/application.properties` 中配置  
+   spring.datasource.url=jdbc:mysql://localhost:3306/testdb  
+   spring.datasource.username=******  
+   spring.datasource.password=******  
+   spring.jpa.hibernate.ddl-auto=update
+   初次運行需手動在 `roles` 表中插入三筆初始化資料：`ROLE_USER`, `ROLE_MODERATOR`, `ROLE_ADMIN`
+2. 資料表設計：  
+   ● user  
+   &emsp;○ `id`: BigInt (Primary Key, Auto Increment)  
+   &emsp;○ `username`: Varchar(20) (Unique)  
+   &emsp;○ `email`: Varchar(50) (Unique)  
+   &emsp;○ `password`: Varchar(120) (BCrypt 雜湊值)  
+   ● roles  
+   &emsp;○ `id`: Integer (Primary Key)  
+   &emsp;○ `name`: Varchar(20) (存儲 ROLE_USER 等)  
+   ● user_roles  
+   &emsp;○ `user_id`: BigInt (Foreign Key -> users.id)  
+   &emsp;○ `role_id`: Integer (Foreign Key -> roles.id)  
